@@ -27,8 +27,6 @@ jobs:
 
       - name: setup python
         uses: actions/setup-python@v2
-        with:
-          python-version: '3.7.3' # install the python version needed
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@master
