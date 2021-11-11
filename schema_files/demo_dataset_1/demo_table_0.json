@@ -8,5 +8,10 @@
       "name": "details",
       "type": "STRING",
       "mode": "NULLABLE"
+    },
+    {
+      "name": "extra",
+      "type": "STRING",
+      "mode": "NULLABLE"
     }
 ]
