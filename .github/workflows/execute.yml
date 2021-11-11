@@ -37,10 +37,10 @@ jobs:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
 
-      - name: install python packages
-        run: |
-          python -m pip install --upgrade pip
-          pip install google-cloud google-cloud-storage google-cloud-bigquery
+#       - name: install python packages
+#         run: |
+#           python -m pip install --upgrade pip
+#           pip install google-cloud google-cloud-storage google-cloud-bigquery
 
       - name: execute py script # run sj-gobierno.py to get the latest data
         run: python test_code_6.py
