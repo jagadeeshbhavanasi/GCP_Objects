@@ -471,14 +471,9 @@ with open("objects_details.json") as file:
                 # To check if external table is not already present in BigQuery dataset
                 if ext_table_name not in bq_tables[dataset_name]:
                     try:
-                        # Checking if source format is valid or not
-                        valid_source_formats = ["CSV","GOOGLE_SHEETS","NEWLINE_DELIMITED_JSON","AVRO","DATASTORE_BACKUP","ORC","PARQUET","BIGTABLE"]
-                        if source_format.isupper() in valid_source_formats:
 
-                            table = external_table_creation(project_id, dataset_name, ext_table_name, json_schema_uri, source_format, source_uris, labels)
-                            print("Created external table {}.{}.{}\n".format(table.project, table.dataset_id, table.table_id))
-                        else:
-                            raise Exception(f"Invalid Source format :- {source_format}\nTry Using {valid_source_formats}")
+                        table = external_table_creation(project_id, dataset_name, ext_table_name, json_schema_uri, source_format, source_uris, labels)
+                        print("Created external table {}.{}.{}\n".format(table.project, table.dataset_id, table.table_id))
 
                     except Exception as e:
                         print(f"WARNING: Unable to create external Table {ext_table_name} in dataset {dataset_name}\n",e)
@@ -498,16 +493,11 @@ with open("objects_details.json") as file:
                     bq_datasets.append(str(dataset.dataset_id))
 
                     try:
-                        # Checking if source format is valid or not
-                        valid_source_formats = ["CSV","GOOGLE_SHEETS","NEWLINE_DELIMITED_JSON","AVRO","DATASTORE_BACKUP","ORC","PARQUET","BIGTABLE"]
-                        if source_format.isupper() in valid_source_formats:
-                            # Create dataset and update the list of table in dataset BigQuery
-                            table = external_table_creation(project_id, dataset_name, ext_table_name, json_schema_uri, source_format, source_uris, labels)
-                            print("Created External table {}.{}.{}\n".format(table.project, table.dataset_id, table.table_id))
+                        # Create dataset and update the list of table in dataset BigQuery
+                        table = external_table_creation(project_id, dataset_name, ext_table_name, json_schema_uri, source_format, source_uris, labels)
+                        print("Created External table {}.{}.{}\n".format(table.project, table.dataset_id, table.table_id))
 
-                            bq_tables.setdefault(str(dataset.dataset_id), []).append(str(table.table_id))
-                        else:
-                            raise Exception(f"Invalid Source format :- {source_format}\nTry Using {valid_source_formats}")
+                        bq_tables.setdefault(str(dataset.dataset_id), []).append(str(table.table_id))
 
                     except Exception as e:
                         print(f"WARNING: Unable to create external table {ext_table_name} in dataset {dataset_name}\n",e)
