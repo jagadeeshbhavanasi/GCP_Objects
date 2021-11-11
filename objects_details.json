@@ -20,13 +20,6 @@
         "schema_json":"schema_files/demo_dataset_1/demo_table_0.json",
         "labels" : {"program":"test", "env" : "dev", "location" : "us", "resource-type": "bq_na_table",
                     "market" : "all", "primary-usecase" : "demo", "optional-usecase" : "none", "usage-type" : "all"}
-      },
-      {
-        "dataset_name":"demo_dataset_3",
-        "table_name":"demo_table_0",
-        "schema_json":"schema_files/demo_dataset_3/demo_table_schema.json",
-        "labels" : {"program":"test", "env" : "dev", "location" : "us", "resource-type": "bq_na_table",
-                    "market" : "all", "primary-usecase" : "demo", "optional-usecase" : "none", "usage-type" : "all"}
       }
 
   ],
