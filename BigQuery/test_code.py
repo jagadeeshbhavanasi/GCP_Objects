@@ -6,7 +6,7 @@ from google.cloud import bigquery
 
 
 project_id = "gcp-project-314410"
-objects_details = "BigQuery/objects_details.json"
+
 
 ## Creating a native table in BigQuery and creating schema from a json file.
 def native_table_creation(project_id, dataset_name, table_name, json_schema_uri, labels):
@@ -269,14 +269,12 @@ def native_table_changes(project_id, dataset_name, table_name, json_schema_uri, 
 
             updated_lables = labels
             cur_lables = table.labels
-            
+
             print(f"\nLabels:- \nNew - {sorted(updated_lables.items())}\nCurrent - {sorted(cur_lables.items())}\n")
             if changed_lables(cur_lables, updated_lables):
 
                 table.labels = updated_lables
                 table = client.update_table(table, ["labels"])  # API request
-                
-                print("{}.{}.{} Table labels has been updated. \n".format(table.project, table.dataset_id, table.table_id))
 
             else:
                 print("No changes have been made to lables.\n")
@@ -367,7 +365,7 @@ def external_table_changes(project_id, dataset_name, ext_table_name, json_schema
 
                 table.labels = updated_lables
                 table = client.update_table(table, ["labels"])  # API request
-                
+
                 print("{}.{}.{} Table labels has been updated. \n".format(table.project, table.dataset_id, table.table_id))
 
             else:
@@ -403,112 +401,122 @@ if datasets:
 
 
 ## Going through all the objects one-by-one in objects_details
-with open(objects_details) as file:
+with open("objects_details.json") as file:
     details = json.load(file)
 
     if details:
+        for obj in details:
+            if obj == 'na_tables_list:
+                # len return number of tables in native_table_list
+                objects = len(details['na_tables_list'])
+                if objects:
+                    # This loop iterate over all the native_table in the list
+                    for i in range(objects):
 
-        # This loop iterate over all the native_table in the list
-        # len return number of tables in native_table_list
-        for i in range(len(details['na_tables_list'])):
+                        # Table details
+                        dataset_name = details['na_tables_list'][i]['dataset_name']
+                        table_name = details['na_tables_list'][i]['table_name']
+                        json_schema_uri = details['na_tables_list'][i]['schema_json']
+                        labels = details['na_tables_list'][i]['labels']
 
-            # Table details
-            dataset_name = details['na_tables_list'][i]['dataset_name']
-            table_name = details['na_tables_list'][i]['table_name']
-            json_schema_uri = details['na_tables_list'][i]['schema_json']
-            labels = details['na_tables_list'][i]['labels']
+                        # To check if dataset is present in BigQuery
+                        if dataset_name in bq_datasets:
+                            # To check table is not already present in BigQuery dataset
+                            if table_name not in bq_tables[dataset_name]:
+                                try:
+                                    table = native_table_creation(project_id, dataset_name, table_name, json_schema_uri, labels)
+                                    print("Created table {}.{}.{}\n".format(table.project, table.dataset_id, table.table_id))
 
-            # To check if dataset is present in BigQuery
-            if dataset_name in bq_datasets:
-                # To check table is not already present in BigQuery dataset
-                if table_name not in bq_tables[dataset_name]:
-                    try:
-                        table = native_table_creation(project_id, dataset_name, table_name, json_schema_uri, labels)
-                        print("Created table {}.{}.{}\n".format(table.project, table.dataset_id, table.table_id))
+                                except Exception as e:
+                                    print(f"WARNING: Unable to create Table {table_name} in dataset {dataset_name}\n",e)
+                            else:
+                                # TODO:
+                                print(f"\nWARNING: Table {table_name} Already EXISTS in dataset {dataset_name} ! ! !\n\n Looking for changes . . . \n\n")
+                                native_table_changes(project_id, dataset_name, table_name, json_schema_uri, labels)
+                        else:
+                            # Creating a new dataset if not present in the project
+                            print(f"\nDataset {dataset_name} does not EXISTS ! ! !\n\nCreating new Dataset {dataset_name} in project {project_id}. . .")
 
-                    except Exception as e:
-                        print(f"WARNING: Unable to create Table {table_name} in dataset {dataset_name}\n",e)
+                            try:
+                                # Create dataset and update the list of datasets in BigQuery
+                                dataset = create_dataset(project_id, dataset_name, labels["location"])
+                                print("Created dataset {}.{}\n".format(client.project, dataset.dataset_id))
+
+                                bq_datasets.append(str(dataset.dataset_id))
+
+                                try:
+                                    # Create dataset and update the list of table in dataset BigQuery
+                                    table = native_table_creation(project_id, dataset_name, table_name, json_schema_uri, labels)
+                                    print("Created table {}.{}.{}\n".format(table.project, table.dataset_id, table.table_id))
+
+                                    bq_tables.setdefault(str(dataset.dataset_id), []).append(str(table.table_id))
+
+                                except Exception as e:
+                                    print(f"WARNING: Unable to create Table {table_name} in dataset {dataset_name}\n",e)
+
+                            except Exception as e:
+                                print(f"WARNING: Unable to create a new dataset {dataset_name} in the project {project_id}.\n",e)
                 else:
-                    # TODO:
-                    print(f"\nWARNING: Table {table_name} Already EXISTS in dataset {dataset_name} ! ! !\n\n Looking for changes . . . \n\n")
-                    native_table_changes(project_id, dataset_name, table_name, json_schema_uri, labels)
-            else:
-                # Creating a new dataset if not present in the project
-                print(f"\nDataset {dataset_name} does not EXISTS ! ! !\n\nCreating new Dataset {dataset_name} in project {project_id}. . .")
+                    print("WARNING: No details for Native table/s is available.")
 
-                try:
-                    # Create dataset and update the list of datasets in BigQuery
-                    dataset = create_dataset(project_id, dataset_name, labels["location"])
-                    print("Created dataset {}.{}\n".format(client.project, dataset.dataset_id))
+            elif obj=="ex_tables_list":
+                # len return number of tables in external_table_list
+                objects = len(details['ex_tables_list'])
+                if objects:
+                    # This loop iterate over all the external_table in the list
+                    for i in range(objects):
 
-                    bq_datasets.append(str(dataset.dataset_id))
-
-                    try:
-                        # Create dataset and update the list of table in dataset BigQuery
-                        table = native_table_creation(project_id, dataset_name, table_name, json_schema_uri, labels)
-                        print("Created table {}.{}.{}\n".format(table.project, table.dataset_id, table.table_id))
-
-                        bq_tables.setdefault(str(dataset.dataset_id), []).append(str(table.table_id))
-
-                    except Exception as e:
-                        print(f"WARNING: Unable to create Table {table_name} in dataset {dataset_name}\n",e)
-
-                except Exception as e:
-                    print(f"WARNING: Unable to create a new dataset {dataset_name} in the project {project_id}.\n",e)
+                        # External table details
+                        dataset_name = details['ex_tables_list'][i]['dataset_name']
+                        ext_table_name = details['ex_tables_list'][i]['table_name']
+                        json_schema_uri = details['ex_tables_list'][i]['schema_json']
+                        source_format = details['ex_tables_list'][i]['source_format']
+                        source_uris = details['ex_tables_list'][i]['source_uris']
+                        labels = details['ex_tables_list'][i]['labels']
 
 
-        # This loop iterate over all the external_table in the list
-        # len return number of tables in external_table_list
-        for i in range(len(details['ex_tables_list'])):
+                        # To check if dataset is present in BigQuery
+                        if dataset_name in bq_datasets:
+                            # To check if external table is not already present in BigQuery dataset
+                            if ext_table_name not in bq_tables[dataset_name]:
+                                try:
 
-            # External table details
-            dataset_name = details['ex_tables_list'][i]['dataset_name']
-            ext_table_name = details['ex_tables_list'][i]['table_name']
-            json_schema_uri = details['ex_tables_list'][i]['schema_json']
-            source_format = details['ex_tables_list'][i]['source_format']
-            source_uris = details['ex_tables_list'][i]['source_uris']
-            labels = details['ex_tables_list'][i]['labels']
+                                    table = external_table_creation(project_id, dataset_name, ext_table_name, json_schema_uri, source_format, source_uris, labels)
+                                    print("Created external table {}.{}.{}\n".format(table.project, table.dataset_id, table.table_id))
 
+                                except Exception as e:
+                                    print(f"WARNING: Unable to create external Table {ext_table_name} in dataset {dataset_name}\n",e)
+                            else:
+                                # TODO:
+                                print(f"\nWARNING: External table {ext_table_name} Already EXISTS in dataset {dataset_name} ! ! !\n\n Looking for changes . . . \n\n")
+                                external_table_changes(project_id, dataset_name, ext_table_name, json_schema_uri, source_format, source_uris, labels)
+                        else:
+                            # Creating a new dataset if not present in the project
+                            print(f"\nDataset {dataset_name} does not EXISTS ! ! !\n\nCreating new Dataset {dataset_name} in project {project_id}. . .")
 
-            # To check if dataset is present in BigQuery
-            if dataset_name in bq_datasets:
-                # To check if external table is not already present in BigQuery dataset
-                if ext_table_name not in bq_tables[dataset_name]:
-                    try:
+                            try:
+                                # Create dataset and update the list of datasets in BigQuery
+                                dataset = create_dataset(project_id, dataset_name, labels["location"])
+                                print("Created dataset {}.{}\n".format(client.project, dataset.dataset_id))
 
-                        table = external_table_creation(project_id, dataset_name, ext_table_name, json_schema_uri, source_format, source_uris, labels)
-                        print("Created external table {}.{}.{}\n".format(table.project, table.dataset_id, table.table_id))
+                                bq_datasets.append(str(dataset.dataset_id))
 
-                    except Exception as e:
-                        print(f"WARNING: Unable to create external Table {ext_table_name} in dataset {dataset_name}\n",e)
+                                try:
+                                    # Create dataset and update the list of table in dataset BigQuery
+                                    table = external_table_creation(project_id, dataset_name, ext_table_name, json_schema_uri, source_format, source_uris, labels)
+                                    print("Created External table {}.{}.{}\n".format(table.project, table.dataset_id, table.table_id))
+
+                                    bq_tables.setdefault(str(dataset.dataset_id), []).append(str(table.table_id))
+
+                                except Exception as e:
+                                    print(f"WARNING: Unable to create external table {ext_table_name} in dataset {dataset_name}\n",e)
+
+                            except Exception as e:
+                                print(f"WARNING: Unable to create a new dataset {dataset_name} in the project {project_id}.\n",e)
                 else:
-                    # TODO:
-                    print(f"\nWARNING: External table {ext_table_name} Already EXISTS in dataset {dataset_name} ! ! !\n\n Looking for changes . . . \n\n")
-                    external_table_changes(project_id, dataset_name, ext_table_name, json_schema_uri, source_format, source_uris, labels)
+                    print("WARNING: No details for External table/s is available.")
             else:
-                # Creating a new dataset if not present in the project
-                print(f"\nDataset {dataset_name} does not EXISTS ! ! !\n\nCreating new Dataset {dataset_name} in project {project_id}. . .")
-
-                try:
-                    # Create dataset and update the list of datasets in BigQuery
-                    dataset = create_dataset(project_id, dataset_name, labels["location"])
-                    print("Created dataset {}.{}\n".format(client.project, dataset.dataset_id))
-
-                    bq_datasets.append(str(dataset.dataset_id))
-
-                    try:
-                        # Create dataset and update the list of table in dataset BigQuery
-                        table = external_table_creation(project_id, dataset_name, ext_table_name, json_schema_uri, source_format, source_uris, labels)
-                        print("Created External table {}.{}.{}\n".format(table.project, table.dataset_id, table.table_id))
-
-                        bq_tables.setdefault(str(dataset.dataset_id), []).append(str(table.table_id))
-
-                    except Exception as e:
-                        print(f"WARNING: Unable to create external table {ext_table_name} in dataset {dataset_name}\n",e)
-
-                except Exception as e:
-                    print(f"WARNING: Unable to create a new dataset {dataset_name} in the project {project_id}.\n",e)
-
+                print("WARNING: Found an invalid object in objects_details")
 
     else:
         print("WARNING: No Objects founds.")
