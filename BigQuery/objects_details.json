@@ -21,7 +21,6 @@
         "labels" : {"program":"test", "env" : "dev", "location" : "us", "resource-type": "bq_na_table",
                     "market" : "all", "primary-usecase" : "demo", "optional-usecase" : "none", "usage-type" : "all"}
       }
-
   ],
   "ex_tables_list":[
     {
