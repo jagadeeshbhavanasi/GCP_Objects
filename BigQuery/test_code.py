@@ -406,7 +406,7 @@ with open("objects_details.json") as file:
 
     if details:
         for obj in details:
-            if obj == 'na_tables_list:
+            if obj == 'na_tables_list':
                 # len return number of tables in native_table_list
                 objects = len(details['na_tables_list'])
                 if objects:
@@ -459,7 +459,7 @@ with open("objects_details.json") as file:
                 else:
                     print("WARNING: No details for Native table/s is available.")
 
-            elif obj=="ex_tables_list":
+            elif obj =="ex_tables_list":
                 # len return number of tables in external_table_list
                 objects = len(details['ex_tables_list'])
                 if objects:
