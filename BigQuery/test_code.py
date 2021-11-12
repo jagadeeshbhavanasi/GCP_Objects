@@ -269,12 +269,14 @@ def native_table_changes(project_id, dataset_name, table_name, json_schema_uri, 
 
             updated_lables = labels
             cur_lables = table.labels
-            OrderedDict(sorted(cur_lables.items()))
-            print(f"\nLabels:- \nNew - {OrderedDict(sorted(updated_lables.items()))}\nCurrent - {OrderedDict(sorted(cur_lables.items()))}\n")
+            
+            print(f"\nLabels:- \nNew - {sorted(updated_lables.items())}\nCurrent - {sorted(cur_lables.items())}\n")
             if changed_lables(cur_lables, updated_lables):
 
                 table.labels = updated_lables
                 table = client.update_table(table, ["labels"])  # API request
+                
+                print("{}.{}.{} Table labels has been updated. \n".format(table.project, table.dataset_id, table.table_id))
 
             else:
                 print("No changes have been made to lables.\n")
@@ -365,6 +367,8 @@ def external_table_changes(project_id, dataset_name, ext_table_name, json_schema
 
                 table.labels = updated_lables
                 table = client.update_table(table, ["labels"])  # API request
+                
+                print("{}.{}.{} Table labels has been updated. \n".format(table.project, table.dataset_id, table.table_id))
 
             else:
                 print("No changes have been made to lables.\n")
