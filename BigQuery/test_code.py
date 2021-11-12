@@ -6,7 +6,7 @@ from google.cloud import bigquery
 
 
 project_id = "gcp-project-314410"
-object_details = "BigQuery/objects_details.json"
+objects_details = "BigQuery/objects_details.json"
 
 ## Creating a native table in BigQuery and creating schema from a json file.
 def native_table_creation(project_id, dataset_name, table_name, json_schema_uri, labels):
