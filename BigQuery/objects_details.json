@@ -22,7 +22,6 @@
                     "market" : "all", "primary-usecase" : "demo", "optional-usecase" : "none", "usage-type" : "all"}
       }
   ],
-  
   "ex_tables_list":[
     {
       "dataset_name":"demo_dataset_2",
