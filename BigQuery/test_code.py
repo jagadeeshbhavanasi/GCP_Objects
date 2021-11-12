@@ -6,7 +6,7 @@ from google.cloud import bigquery
 
 
 project_id = "gcp-project-314410"
-
+objects_details = "BigQuery/objects_details.json"
 
 ## Creating a native table in BigQuery and creating schema from a json file.
 def native_table_creation(project_id, dataset_name, table_name, json_schema_uri, labels):
@@ -198,9 +198,9 @@ def native_table_changes(project_id, dataset_name, table_name, json_schema_uri, 
                 table = client.update_table(table, ["schema"])  # Make an API request.
 
                 if len(table.schema) >= len(original_schema):
-                    print("A new column/s has been added to table {}.{}.{}\n".format(table.project, table.dataset_id, table.table_id))
+                    print("A new column/s have been added to table {}.{}.{}\n".format(table.project, table.dataset_id, table.table_id))
                 else:
-                    print("The column/s has not been added table {}.{}.{}\n".format(table.project, table.dataset_id, table.table_id))
+                    print("The column/s have not been added table {}.{}.{}\n".format(table.project, table.dataset_id, table.table_id))
 
             except Exception as e:
                 print(e)
@@ -231,9 +231,9 @@ def native_table_changes(project_id, dataset_name, table_name, json_schema_uri, 
             table = client.get_table(f"{project_id}.{dataset_name}.{table_name}")
 
             if len(table.schema)<len(original_schema):
-                print("A column/s has been deleted from table {}.{}.{}\n".format(table.project, table.dataset_id, table.table_id))
+                print("A column/s have been deleted from table {}.{}.{}\n".format(table.project, table.dataset_id, table.table_id))
             else:
-                print("The column/s has not been deleted from table {}.{}.{}\n".format(table.project, table.dataset_id, table.table_id))
+                print("The column/s have not been deleted from table {}.{}.{}\n".format(table.project, table.dataset_id, table.table_id))
 
     else:
         # Case where number of columns are same but have changes in schema.
@@ -255,7 +255,7 @@ def native_table_changes(project_id, dataset_name, table_name, json_schema_uri, 
 
                 table = client.get_table(f"{project_id}.{dataset_name}.{table_name}")
 
-                print("{}.{}.{} Table schema has been updated. \n".format(table.project, table.dataset_id, table.table_id))
+                print("{}.{}.{} Table schema have been updated. \n".format(table.project, table.dataset_id, table.table_id))
 
             except Exception as e:
                 print(e)
@@ -275,6 +275,8 @@ def native_table_changes(project_id, dataset_name, table_name, json_schema_uri, 
 
                 table.labels = updated_lables
                 table = client.update_table(table, ["labels"])  # API request
+
+                print("{}.{}.{} Table's labels have been updated. \n".format(table.project, table.dataset_id, table.table_id))
 
             else:
                 print("No changes have been made to lables.\n")
@@ -307,7 +309,7 @@ def external_table_changes(project_id, dataset_name, ext_table_name, json_schema
 
             table = external_table_creation(project_id, dataset_name, ext_table_name, json_schema_uri, source_format, source_uris, labels)
 
-            print("{}.{}.{} Table schema has been updated. \n".format(table.project, table.dataset_id, table.table_id))
+            print("{}.{}.{} Table schema have been updated. \n".format(table.project, table.dataset_id, table.table_id))
 
         except Exception as e:
             print(e)
@@ -348,7 +350,7 @@ def external_table_changes(project_id, dataset_name, ext_table_name, json_schema
 
                 table = external_table_creation(project_id, dataset_name, ext_table_name, json_schema_uri, source_format, source_uris, labels)
 
-                print("{}.{}.{} Table data configuration has been updated. \n".format(table.project, table.dataset_id, table.table_id))
+                print("{}.{}.{} Table data configuration have been updated. \n".format(table.project, table.dataset_id, table.table_id))
 
             except Exception as e:
                 print(e)
@@ -366,8 +368,7 @@ def external_table_changes(project_id, dataset_name, ext_table_name, json_schema
                 table.labels = updated_lables
                 table = client.update_table(table, ["labels"])  # API request
 
-                print("{}.{}.{} Table labels has been updated. \n".format(table.project, table.dataset_id, table.table_id))
-
+                print("{}.{}.{} Table's labels have been updated. \n".format(table.project, table.dataset_id, table.table_id))
             else:
                 print("No changes have been made to lables.\n")
 
@@ -401,12 +402,12 @@ if datasets:
 
 
 ## Going through all the objects one-by-one in objects_details
-with open("objects_details.json") as file:
+with open(objects_details) as file:
     details = json.load(file)
 
     if details:
         for obj in details:
-            if obj == 'na_tables_list':
+            if obj =='na_tables_list':
                 # len return number of tables in native_table_list
                 objects = len(details['na_tables_list'])
                 if objects:
@@ -459,7 +460,7 @@ with open("objects_details.json") as file:
                 else:
                     print("WARNING: No details for Native table/s is available.")
 
-            elif obj =="ex_tables_list":
+            elif obj =='ex_tables_list':
                 # len return number of tables in external_table_list
                 objects = len(details['ex_tables_list'])
                 if objects:
