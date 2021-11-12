@@ -47,4 +47,4 @@ jobs:
           pip install google-cloud google-cloud-storage google-cloud-bigquery
 
       - name: execute py script # run test_code.py to update the latest changes
-        run: python test_code.py
+        run: python BigQuery/test_code.py
